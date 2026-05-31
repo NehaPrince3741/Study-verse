@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<title>Study App – NEHA</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Poppins:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --pink: #ff2d78;
+    --pink-light: #ff6ba8;
+    --pink-glow: rgba(255,45,120,0.22);
+    --bg: #080808;
+    --card: #111111;
+    --text: #ffffff;
+    --subtext: #aaaaaa;
+    --border: #ff2d78;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    font-family: 'Nunito', sans-serif;
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    overflow-x: hidden;
+  }
+
+  #app {
+    width: 100%;
+    max-width: 430px;
+    min-height: 100vh;
+    position: relative;
+    overflow: hidden;
+    background: var(--bg);
+  }
+
+  /* Wave BG */
+  .wave-bg {
+    position: fixed;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 100%; max-width: 430px;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+  .wave-bg::before {
+    content: '';
+    position: absolute;
+    top: -80px; right: -80px;
+    width: 320px; height: 320px;
+    background: radial-gradient(circle, rgba(255,45,120,0.22) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .wave-bg::after {
+    content: '';
+    position: absolute;
+    bottom: 80px; left: -60px;
+    width: 260px; height: 260px;
+    background: radial-gradient(circle, rgba(255,45,120,0.14) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .wave-line {
+    position: absolute;
+    border-radius: 50%;
+    border: 1px solid rgba(255,45,120,0.13);
+  }
+  .wave-line:nth-child(1) { width: 600px; height: 600px; top: -200px; right: -250px; }
+  .wave-line:nth-child(2) { width: 500px; height: 500px; top: -160px; right: -220px; border-color: rgba(255,45,120,0.08); }
+  .wave-line:nth-child(3) { width: 400px; height: 700px; bottom: -200px; left: -200px; border-color: rgba(255,45,120,0.10); }
+
+  /* Screens */
+  .screen {
+    display: none;
+    position: relative;
+    z-index: 1;
+    padding: 70px 16px 100px 16px;
+    min-height: 100vh;
+    animation: fadeIn 0.22s ease;
+  }
+  .screen.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateX(18px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
+  /* Top Bar */
+  .topbar {
+    position: fixed;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 100%; max-width: 430px;
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 22px 10px 22px;
+    background: linear-gradient(to bottom, #080808 70%, transparent);
+  }
+  .topbar button {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+  }
+
+  /* Bottom Nav */
+  .bottomnav {
+    position: fixed;
+    bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 100%; max-width: 430px;
+    background: rgba(10,10,10,0.97);
+    border-top: 1.5px solid #1c1c1c;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: 10px 0 20px 0;
+    z-index: 200;
+  }
+  .nav-btn {
+    background: transparent;
+    border: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    cursor: pointer;
+    padding: 4px 12px;
+    color: #555;
+    font-size: 11px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 600;
+    transition: color 0.15s;
+  }
+  .nav-btn.active { color: var(--pink); }
+  .nav-btn svg { transition: transform 0.15s; }
+  .nav-btn:active svg { transform: scale(0.9); }
+  .nav-center {
+    width: 50px; height: 50px;
+    border-radius: 50%;
+    border: 2px solid var(--pink);
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 18px rgba(255,45,120,0.32);
+    cursor: pointer;
+    transition: box-shadow 0.2s;
+  }
+  .nav-center:active { box-shadow: 0 0 30px rgba(255,45,120,0.55); }
+  .nav-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--pink); margin-top: 2px; }
+
+  /* Home Screen */
+  .welcome-section { padding: 10px 6px 20px 6px; }
+  .welcome-small { font-size: 18px; color: #fff; font-weight: 600; margin-bottom: 2px; }
+  .welcome-name {
+    font-size: 52px;
+    font-weight: 900;
+    font-family: 'Poppins', sans-serif;
+    color: var(--pink);
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    letter-spacing: -1px;
+  }
+  .welcome-name .heart { font-size: 36px; }
+  .welcome-sub { font-size: 14px; color: #bbb; margin-top: 10px; line-height: 1.6; }
+
+  .cards-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 13px;
+    margin-top: 6px;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1.5px solid var(--pink);
+    border-radius: 18px;
+    padding: 20px 14px 36px 16px;
+    cursor: pointer;
+    position: relative;
+    transition: box-shadow 0.2s, transform 0.15s;
+    box-shadow: 0 0 14px rgba(255,45,120,0.15);
+    overflow: hidden;
+    min-height: 140px;
+  }
+  .card:active { transform: scale(0.97); box-shadow: 0 0 28px rgba(255,45,120,0.35); }
+  .card-icon { margin-bottom: 10px; }
+  .card-title { font-size: 17px; font-weight: 800; color: #fff; margin-bottom: 4px; font-family: 'Poppins', sans-serif; }
+  .card-desc { font-size: 12px; color: #999; line-height: 1.4; }
+  .card-arrow {
+    position: absolute;
+    right: 14px; bottom: 14px;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 100px; height: 100px;
+    background: radial-gradient(circle, rgba(255,45,120,0.10) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .quote-bar {
+    margin-top: 14px;
+    background: var(--card);
+    border: 1.5px solid var(--pink);
+    border-radius: 14px;
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 0 10px rgba(255,45,120,0.10);
+  }
+  .quote-text { flex: 1; font-size: 13px; color: #ccc; text-align: center; line-height: 1.5; }
+  .quote-heart { color: var(--pink); font-size: 20px; }
+  .quote-star { color: var(--pink); font-size: 18px; }
+
+  /* Back Button */
+  .back-btn {
+    background: transparent;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--pink);
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 2px 0 14px 0;
+    font-family: 'Nunito', sans-serif;
+    transition: opacity 0.15s;
+  }
+  .back-btn:active { opacity: 0.7; }
+
+  /* Screen Title */
+  .screen-title { font-size: 26px; font-weight: 900; color: #fff; margin-bottom: 4px; font-family: 'Poppins', sans-serif; }
+  .screen-sub { font-size: 13px; color: #888; margin-bottom: 20px; }
+
+  /* Option Row */
+  .option-row {
+    background: var(--card);
+    border: 1.5px solid var(--pink);
+    border-radius: 14px;
+    color: #fff;
+    padding: 17px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 700;
+    font-family: 'Nunito', sans-serif;
+    box-shadow: 0 0 12px rgba(255,45,120,0.13);
+    width: 100%;
+    margin-bottom: 13px;
+    transition: box-shadow 0.18s, transform 0.15s;
+    text-align: left;
+  }
+  .option-row:active { transform: scale(0.98); box-shadow: 0 0 22px rgba(255,45,120,0.32); }
+  .option-row-left { display: flex; align-items: center; gap: 12px; }
+
+  /* Unit Button */
+  .unit-btn {
+    background: linear-gradient(90deg, #150a10, #12081a);
+    border: 1.5px solid var(--pink);
+    border-radius: 12px;
+    color: var(--pink-light);
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: 'Nunito', sans-serif;
+    box-shadow: 0 0 10px rgba(255,45,120,0.12);
+    width: 100%;
+    margin-bottom: 12px;
+    transition: box-shadow 0.18s, transform 0.15s;
+    text-decoration: none;
+    letter-spacing: 0.5px;
+  }
+  .unit-btn:active { transform: scale(0.97); box-shadow: 0 0 20px rgba(255,45,120,0.35); }
+  .unit-btn.no-link { color: #555; background: #111; cursor: default; border-color: #333; box-shadow: none; }
+
+  /* Coming Soon */
+  .coming-soon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    text-align: center;
+    gap: 12px;
+  }
+  .coming-soon .emoji { font-size: 64px; margin-bottom: 8px; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.08)} }
+  .coming-soon-title { font-size: 30px; font-weight: 900; color: var(--pink); font-family: 'Poppins', sans-serif; }
+  .coming-soon-sub { font-size: 15px; color: #777; line-height: 1.6; }
+
+  /* SVGs inline */
+  svg { display: block; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 3px; }
+  ::-webkit-scrollbar-thumb { background: #ff2d7840; border-radius: 4px; }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <!-- Wave BG -->
+  <div class="wave-bg">
+    <div class="wave-line"></div>
+    <div class="wave-line"></div>
+    <div class="wave-line"></div>
+  </div>
+
+  <!-- Top Bar -->
+  <div class="topbar">
+    <button onclick="goHome()" aria-label="Menu">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <path d="M4 6h16M4 12h16M4 18h16" stroke="#ff2d78" stroke-width="1.9" stroke-linecap="round"/>
+      </svg>
+    </button>
+    <button aria-label="Notifications">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <path d="M12 3a7 7 0 0 0-7 7v4l-2 3h18l-2-3v-4a7 7 0 0 0-7-7z" stroke="#ff2d78" stroke-width="1.8"/>
+        <path d="M10 19a2 2 0 0 0 4 0" stroke="#ff2d78" stroke-width="1.8"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- ===== HOME SCREEN ===== -->
+  <div class="screen active" id="screen-home">
+    <div class="welcome-section">
+      <div class="welcome-small">Welcome,</div>
+      <div class="welcome-name">
+        NEHA <span class="heart">♡</span>
+      </div>
+      <div class="welcome-sub">Let's learn, grow<br>and achieve together! ✦</div>
+    </div>
+
+    <div class="cards-grid">
+      <div class="card" onclick="showScreen('subjects')">
+        <div class="card-icon">
+          <svg width="42" height="42" viewBox="0 0 42 42" fill="none">
+            <path d="M6 32V12a2 2 0 0 1 2-2h9a6 6 0 0 1 6 6v18M6 32h30M36 32V16a6 6 0 0 0-6-6h-7" stroke="#ff2d78" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M21 32V16" stroke="#ff2d78" stroke-width="2.1" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="card-title">Subjects</div>
+        <div class="card-desc">Explore your study subjects</div>
+        <div class="card-arrow">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M7 5l4 4-4 4" stroke="#ff2d78" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+
+      <div class="card" onclick="comingSoon('Notes')">
+        <div class="card-icon">
+          <svg width="42" height="42" viewBox="0 0 42 42" fill="none">
+            <rect x="9" y="5" width="22" height="30" rx="3" stroke="#ff2d78" stroke-width="2.1"/>
+            <path d="M14 13h14M14 19h14M14 25h8" stroke="#ff2d78" stroke-width="2.1" stroke-linecap="round"/>
+            <path d="M27 27l6 6" stroke="#ff2d78" stroke-width="2.1" stroke-linecap="round"/>
+            <circle cx="30" cy="30" r="3" stroke="#ff2d78" stroke-width="1.8"/>
+          </svg>
+        </div>
+        <div class="card-title">Notes</div>
+        <div class="card-desc">Access your study notes</div>
+        <div class="card-arrow">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M7 5l4 4-4 4" stroke="#ff2d78" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+
+      <div class="card" onclick="comingSoon('To-Do')">
+        <div class="card-icon">
+          <svg width="42" height="42" viewBox="0 0 42 42" fill="none">
+            <rect x="9" y="5" width="22" height="30" rx="3" stroke="#ff2d78" stroke-width="2.1"/>
+            <path d="M14 14l2 2 4-4M14 21l2 2 4-4M14 28l2 2 4-4" stroke="#ff2d78" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="card-title">To-Do</div>
+        <div class="card-desc">Plan your tasks and stay on track</div>
+        <div class="card-arrow">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M7 5l4 4-4 4" stroke="#ff2d78" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+
+      <div class="card" onclick="comingSoon('Quizzes')">
+        <div class="card-icon">
+          <svg width="42" height="42" viewBox="0 0 42 42" fill="none">
+            <path d="M21 38c9 0 17-8 17-17S30 4 21 4 4 12 4 21s8 17 17 17z" stroke="#ff2d78" stroke-width="2.1"/>
+            <path d="M21 24v-1c0-2 1.5-3 3-4.2 1-.8 1.5-1.8 1.5-2.8 0-2.2-1.7-3.5-4.5-3.5-2.2 0-4 1.2-4.5 3" stroke="#ff2d78" stroke-width="2.1" stroke-linecap="round"/>
+            <circle cx="21" cy="30" r="1.6" fill="#ff2d78"/>
+          </svg>
+        </div>
+        <div class="card-title">Quizzes</div>
+        <div class="card-desc">Test your knowledge and improve</div>
+        <div class="card-arrow">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M7 5l4 4-4 4" stroke="#ff2d78" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+
+      <div class="card" onclick="comingSoon('Progress')">
+        <div class="card-icon">
+          <svg width="42" height="42" viewBox="0 0 42 42" fill="none">
+            <rect x="6" y="26" width="8" height="12" rx="2" fill="#ff2d78"/>
+            <rect x="17" y="18" width="8" height="20" rx="2" fill="#ff2d78" opacity=".7"/>
+            <rect x="28" y="10" width="8" height="28" rx="2" fill="#ff2d78" opacity=".5"/>
+          </svg>
+        </div>
+        <div class="card-title">Progress</div>
+        <div class="card-desc">Track your learning progress</div>
+        <div class="card-arrow">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M7 5l4 4-4 4" stroke="#ff2d78" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+
+      <div class="card" onclick="comingSoon('Favorites')">
+        <div class="card-icon">
+          <svg width="42" height="42" viewBox="0 0 42 42" fill="none">
+            <path d="M21 7l4.5 9 10 1.5-7.2 7 1.7 10L21 30l-9 4.5 1.7-10L6.5 17.5l10-1.5z" stroke="#ff2d78" stroke-width="2.1" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="card-title">Favorites</div>
+        <div class="card-desc">Save important topics and revisit</div>
+        <div class="card-arrow">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M7 5l4 4-4 4" stroke="#ff2d78" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="quote-bar">
+      <span class="quote-star">✦</span>
+      <span class="quote-text">Small steps every day lead to big results.</span>
+      <span class="quote-heart">♡</span>
+    </div>
+  </div>
+
+  <!-- ===== SUBJECTS SCREEN ===== -->
+  <div class="screen" id="screen-subjects">
+    <button class="back-btn" onclick="goHome()">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M13 16l-6-6 6-6" stroke="#ff2d78" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Home
+    </button>
+    <div class="screen-title">Subjects</div>
+    <div class="screen-sub">Choose your semester</div>
+    <button class="option-row" onclick="showScreen('sem3')">
+      <span class="option-row-left">Semester 3</span>
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M7 5l4 4-4 4" stroke="#ff2d78" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <button class="option-row" onclick="showScreen('sem4')">
+      <span class="option-row-left">Semester 4</span>
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M7 5l4 4-4 4" stroke="#ff2d78" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+
+  <!-- ===== SEM 4 SCREEN ===== -->
+  <div class="screen" id="screen-sem4">
+    <button class="back-btn" onclick="showScreen('subjects')">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M13 16l-6-6 6-6" stroke="#ff2d78" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Subjects
+    </button>
+    <div class="coming-soon">
+      <div class="emoji">🚀</div>
+      <div class="coming-soon-title">Coming Soon</div>
+      <div class="coming-soon-sub">Semester 4 content is being prepared.<br>Stay tuned, NEHA! 💗</div>
+    </div>
+  </div>
+
+  <!-- ===== SEM 3 SCREEN ===== -->
+  <div class="screen" id="screen-sem3">
+    <button class="back-btn" onclick="showScreen('subjects')">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M13 16l-6-6 6-6" stroke="#ff2d78" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Subjects
+    </button>
+    <div class="screen-title">Semester 3</div>
+    <div class="screen-sub">Select a subject</div>
+    <button class="option-row" onclick="showScreen('dstl')">
+      <span class="option-row-left">DSTL</span>
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M7 5l4 4-4 4" stroke="#ff2d78" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <button class="option-row" onclick="showScreen('de')">
+      <span class="option-row-left">Digital Electronics</span>
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M7 5l4 4-4 4" stroke="#ff2d78" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <button class="option-row" onclick="showScreen('cs')">
+      <span class="option-row-left">Cyber Security</span>
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M7 5l4 4-4 4" stroke="#ff2d78" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <button class="option-row" onclick="showScreen('ds')">
+      <span class="option-row-left">DS</span>
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M7 5l4 4-4 4" stroke="#ff2d78" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <button class="option-row" onclick="showScreen('hv')">
+      <span class="option-row-left">Human Values</span>
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M7 5l4 4-4 4" stroke="#ff2d78" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <button class="option-row" onclick="showScreen('coa')">
+      <span class="option-row-left">COA</span>
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M7 5l4 4-4 4" stroke="#ff2d78" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+
+  <!-- ===== DSTL SCREEN ===== -->
+  <div class="screen" id="screen-dstl">
+    <button class="back-btn" onclick="showScreen('sem3')">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M13 16l-6-6 6-6" stroke="#ff2d78" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Semester 3
+    </button>
+    <div class="screen-title">DSTL</div>
+    <div class="screen-sub">Select a unit to watch</div>
+    <div class="unit-btn no-link">UNIT 1 <span style="font-size:12px;color:#555">Coming soon</span></div>
+    <div class="unit-btn no-link">UNIT 2 <span style="font-size:12px;color:#555">Coming soon</span></div>
+    <div class="unit-btn no-link">UNIT 3 <span style="font-size:12px;color:#555">Coming soon</span></div>
+    <div class="unit-btn no-link">UNIT 4 <span style="font-size:12px;color:#555">Coming soon</span></div>
+    <div class="unit-btn no-link">UNIT 5 <span style="font-size:12px;color:#555">Coming soon</span></div>
+  </div>
+
+  <!-- ===== DIGITAL ELECTRONICS SCREEN ===== -->
+  <div class="screen" id="screen-de">
+    <button class="back-btn" onclick="showScreen('sem3')">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M13 16l-6-6 6-6" stroke="#ff2d78" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Semester 3
+    </button>
+    <div class="screen-title">Digital Electronics</div>
+    <div class="screen-sub">Select a unit to watch</div>
+    <a class="unit-btn" href="https://youtu.be/r9USM-kdg_M?si=gsp1BvTDi0Q2D0Tc" target="_blank">UNIT 1 <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M7 9a4 4 0 0 0 5.66 0l2-2A4 4 0 0 0 9 1.34L8 2.34" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/><path d="M11 9a4 4 0 0 0-5.66 0l-2 2A4 4 0 0 0 9 16.66l1-1" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/></svg></a>
+    <a class="unit-btn" href="https://youtu.be/OakjqxOFyA4?si=lkiXPEhVz-xAQNxO" target="_blank">UNIT 2 <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M7 9a4 4 0 0 0 5.66 0l2-2A4 4 0 0 0 9 1.34L8 2.34" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/><path d="M11 9a4 4 0 0 0-5.66 0l-2 2A4 4 0 0 0 9 16.66l1-1" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/></svg></a>
+    <a class="unit-btn" href="https://youtu.be/Xbg6EUZWKiY?si=F3VKM4fNS8L1KHmP" target="_blank">UNIT 3 <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M7 9a4 4 0 0 0 5.66 0l2-2A4 4 0 0 0 9 1.34L8 2.34" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/><path d="M11 9a4 4 0 0 0-5.66 0l-2 2A4 4 0 0 0 9 16.66l1-1" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/></svg></a>
+    <a class="unit-btn" href="https://youtu.be/s8K267-tDyY?si=Nn3P3w51lXuyvwLO" target="_blank">UNIT 4 <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M7 9a4 4 0 0 0 5.66 0l2-2A4 4 0 0 0 9 1.34L8 2.34" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/><path d="M11 9a4 4 0 0 0-5.66 0l-2 2A4 4 0 0 0 9 16.66l1-1" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/></svg></a>
+    <a class="unit-btn" href="https://youtu.be/_HY-XMzKbGY?si=oCJfAD7Ffml3sDST" target="_blank">UNIT 5 <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M7 9a4 4 0 0 0 5.66 0l2-2A4 4 0 0 0 9 1.34L8 2.34" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/><path d="M11 9a4 4 0 0 0-5.66 0l-2 2A4 4 0 0 0 9 16.66l1-1" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/></svg></a>
+  </div>
+
+  <!-- ===== CYBER SECURITY SCREEN ===== -->
+  <div class="screen" id="screen-cs">
+    <button class="back-btn" onclick="showScreen('sem3')">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M13 16l-6-6 6-6" stroke="#ff2d78" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Semester 3
+    </button>
+    <div class="screen-title">Cyber Security</div>
+    <div class="screen-sub">Choose your source</div>
+    <button class="option-row" onclick="showScreen('cs-gateway')">
+      <span class="option-row-left">Gateway</span>
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M7 5l4 4-4 4" stroke="#ff2d78" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <button class="option-row" onclick="showScreen('cs-adda')">
+      <span class="option-row-left">Semester Adda</span>
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M7 5l4 4-4 4" stroke="#ff2d78" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+
+  <!-- ===== CS GATEWAY SCREEN ===== -->
+  <div class="screen" id="screen-cs-gateway">
+    <button class="back-btn" onclick="showScreen('cs')">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M13 16l-6-6 6-6" stroke="#ff2d78" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Cyber Security
+    </button>
+    <div class="screen-title">Gateway</div>
+    <div class="screen-sub">Cyber Security – Select a unit</div>
+    <a class="unit-btn" href="https://youtu.be/CS0TnarvYhM?si=EFwty7n3OzrP1yIS" target="_blank">UNIT 1 <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M7 9a4 4 0 0 0 5.66 0l2-2A4 4 0 0 0 9 1.34L8 2.34" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/><path d="M11 9a4 4 0 0 0-5.66 0l-2 2A4 4 0 0 0 9 16.66l1-1" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/></svg></a>
+    <a class="unit-btn" href="https://youtu.be/2iko-lNlQIM?si=7ZntdADxByx78jaK" target="_blank">UNIT 2 <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M7 9a4 4 0 0 0 5.66 0l2-2A4 4 0 0 0 9 1.34L8 2.34" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/><path d="M11 9a4 4 0 0 0-5.66 0l-2 2A4 4 0 0 0 9 16.66l1-1" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/></svg></a>
+    <a class="unit-btn" href="https://youtu.be/yzPe7QyP9yE?si=_6hcs_K9cBPpTHk0" target="_blank">UNIT 3 <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M7 9a4 4 0 0 0 5.66 0l2-2A4 4 0 0 0 9 1.34L8 2.34" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/><path d="M11 9a4 4 0 0 0-5.66 0l-2 2A4 4 0 0 0 9 16.66l1-1" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/></svg></a>
+    <a class="unit-btn" href="https://youtu.be/SV88eugd8V8?si=HRT75tXXwXyKzyX_" target="_blank">UNIT 4 <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M7 9a4 4 0 0 0 5.66 0l2-2A4 4 0 0 0 9 1.34L8 2.34" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/><path d="M11 9a4 4 0 0 0-5.66 0l-2 2A4 4 0 0 0 9 16.66l1-1" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/></svg></a>
+    <a class="unit-btn" href="https://youtu.be/a_AHOt8_9zE?si=KS-U9BWMzkSEi1Ym" target="_blank">UNIT 5 <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M7 9a4 4 0 0 0 5.66 0l2-2A4 4 0 0 0 9 1.34L8 2.34" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/><path d="M11 9a4 4 0 0 0-5.66 0l-2 2A4 4 0 0 0 9 16.66l1-1" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/></svg></a>
+  </div>
+
+  <!-- ===== CS SEMESTER ADDA SCREEN ===== -->
+  <div class="screen" id="screen-cs-adda">
+    <button class="back-btn" onclick="showScreen('cs')">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M13 16l-6-6 6-6" stroke="#ff2d78" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Cyber Security
+    </button>
+    <div class="screen-title">Semester Adda</div>
+    <div class="screen-sub">Cyber Security – Select a unit</div>
+    <a class="unit-btn" href="https://youtu.be/KWRebgEgMnc?si=03dSckrQlDLoRizQ" target="_blank">UNIT 1 <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M7 9a4 4 0 0 0 5.66 0l2-2A4 4 0 0 0 9 1.34L8 2.34" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/><path d="M11 9a4 4 0 0 0-5.66 0l-2 2A4 4 0 0 0 9 16.66l1-1" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/></svg></a>
+    <a class="unit-btn" href="https://youtu.be/0i_EuabRl7E?si=FMACGz_2yewI2Ty3" target="_blank">UNIT 2 <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M7 9a4 4 0 0 0 5.66 0l2-2A4 4 0 0 0 9 1.34L8 2.34" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/><path d="M11 9a4 4 0 0 0-5.66 0l-2 2A4 4 0 0 0 9 16.66l1-1" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/></svg></a>
+    <a class="unit-btn" href="https://youtu.be/drKaRSMm9_0?si=TxX87-dIq2W4yhtt" target="_blank">UNIT 3 <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M7 9a4 4 0 0 0 5.66 0l2-2A4 4 0 0 0 9 1.34L8 2.34" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/><path d="M11 9a4 4 0 0 0-5.66 0l-2 2A4 4 0 0 0 9 16.66l1-1" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/></svg></a>
+    <a class="unit-btn" href="https://youtu.be/dxTdgMqN06I?si=15lUPQ7udTQfG6QF" target="_blank">UNIT 4 <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M7 9a4 4 0 0 0 5.66 0l2-2A4 4 0 0 0 9 1.34L8 2.34" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/><path d="M11 9a4 4 0 0 0-5.66 0l-2 2A4 4 0 0 0 9 16.66l1-1" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/></svg></a>
+  </div>
+
+  <!-- ===== DS SCREEN ===== -->
+  <div class="screen" id="screen-ds">
+    <button class="back-btn" onclick="showScreen('sem3')">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M13 16l-6-6 6-6" stroke="#ff2d78" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Semester 3
+    </button>
+    <div class="screen-title">DS</div>
+    <div class="screen-sub">Select a unit to watch</div>
+    <a class="unit-btn" href="https://youtu.be/LMxboZv2j8A?si=dCxNZw53MNhq32lK" target="_blank">UNIT 1 <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M7 9a4 4 0 0 0 5.66 0l2-2A4 4 0 0 0 9 1.34L8 2.34" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/><path d="M11 9a4 4 0 0 0-5.66 0l-2 2A4 4 0 0 0 9 16.66l1-1" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/></svg></a>
+    <a class="unit-btn" href="https://youtu.be/uQf0hFjlNqI?si=BAJeU0N1ZSHsj9xb" target="_blank">UNIT 2 <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M7 9a4 4 0 0 0 5.66 0l2-2A4 4 0 0 0 9 1.34L8 2.34" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/><path d="M11 9a4 4 0 0 0-5.66 0l-2 2A4 4 0 0 0 9 16.66l1-1" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/></svg></a>
+    <a class="unit-btn" href="https://youtu.be/2xaQfnOkeyA?si=ckSRvX_WbvNyWIKV" target="_blank">UNIT 3 <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M7 9a4 4 0 0 0 5.66 0l2-2A4 4 0 0 0 9 1.34L8 2.34" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/><path d="M11 9a4 4 0 0 0-5.66 0l-2 2A4 4 0 0 0 9 16.66l1-1" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/></svg></a>
+    <a class="unit-btn" href="https://youtu.be/YeZSvKdXmgo?si=fodtO4mnmktZAqCQ" target="_blank">UNIT 4 <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M7 9a4 4 0 0 0 5.66 0l2-2A4 4 0 0 0 9 1.34L8 2.34" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/><path d="M11 9a4 4 0 0 0-5.66 0l-2 2A4 4 0 0 0 9 16.66l1-1" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/></svg></a>
+    <a class="unit-btn" href="https://youtu.be/sxytRTqB2BA?si=leCI7OcftyVWXMtt" target="_blank">UNIT 5 <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M7 9a4 4 0 0 0 5.66 0l2-2A4 4 0 0 0 9 1.34L8 2.34" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/><path d="M11 9a4 4 0 0 0-5.66 0l-2 2A4 4 0 0 0 9 16.66l1-1" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/></svg></a>
+  </div>
+
+  <!-- ===== HUMAN VALUES SCREEN ===== -->
+  <div class="screen" id="screen-hv">
+    <button class="back-btn" onclick="showScreen('sem3')">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M13 16l-6-6 6-6" stroke="#ff2d78" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Semester 3
+    </button>
+    <div class="screen-title">Human Values</div>
+    <div class="screen-sub">Select a unit to watch</div>
+    <a class="unit-btn" href="https://youtu.be/HDXIsoYVclI?si=xb71cWZ1fDqDGlvx" target="_blank">UNIT 1 <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M7 9a4 4 0 0 0 5.66 0l2-2A4 4 0 0 0 9 1.34L8 2.34" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/><path d="M11 9a4 4 0 0 0-5.66 0l-2 2A4 4 0 0 0 9 16.66l1-1" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/></svg></a>
+    <a class="unit-btn" href="https://youtu.be/zcUSYXDbEsg?si=bC9C-8DQwSTInpRd" target="_blank">UNIT 2 <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M7 9a4 4 0 0 0 5.66 0l2-2A4 4 0 0 0 9 1.34L8 2.34" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/><path d="M11 9a4 4 0 0 0-5.66 0l-2 2A4 4 0 0 0 9 16.66l1-1" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/></svg></a>
+    <a class="unit-btn" href="https://youtu.be/ND4fxJtyp38?si=RTbZLiu3HwvS3UgX" target="_blank">UNIT 3 <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M7 9a4 4 0 0 0 5.66 0l2-2A4 4 0 0 0 9 1.34L8 2.34" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/><path d="M11 9a4 4 0 0 0-5.66 0l-2 2A4 4 0 0 0 9 16.66l1-1" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/></svg></a>
+    <a class="unit-btn" href="https://youtu.be/vE71rOGj5I8?si=yEVoD-JEJ_H8Prdb" target="_blank">UNIT 4 <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M7 9a4 4 0 0 0 5.66 0l2-2A4 4 0 0 0 9 1.34L8 2.34" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/><path d="M11 9a4 4 0 0 0-5.66 0l-2 2A4 4 0 0 0 9 16.66l1-1" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/></svg></a>
+    <a class="unit-btn" href="https://youtu.be/Q3PorTRYbQE?si=zOeYEp1BhOhEEvzs" target="_blank">UNIT 5 <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M7 9a4 4 0 0 0 5.66 0l2-2A4 4 0 0 0 9 1.34L8 2.34" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/><path d="M11 9a4 4 0 0 0-5.66 0l-2 2A4 4 0 0 0 9 16.66l1-1" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/></svg></a>
+  </div>
+
+  <!-- ===== COA SCREEN ===== -->
+  <div class="screen" id="screen-coa">
+    <button class="back-btn" onclick="showScreen('sem3')">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M13 16l-6-6 6-6" stroke="#ff2d78" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Semester 3
+    </button>
+    <div class="screen-title">COA</div>
+    <div class="screen-sub">Select a unit to watch</div>
+    <a class="unit-btn" href="https://youtu.be/X-MlljRcOCQ?si=LRcRywLQPPfkEJw3" target="_blank">UNIT 1 <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M7 9a4 4 0 0 0 5.66 0l2-2A4 4 0 0 0 9 1.34L8 2.34" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/><path d="M11 9a4 4 0 0 0-5.66 0l-2 2A4 4 0 0 0 9 16.66l1-1" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/></svg></a>
+    <a class="unit-btn" href="https://youtu.be/oHlmYQW0rvs?si=HRSTY5xOE5Xa1vKa" target="_blank">UNIT 2 <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M7 9a4 4 0 0 0 5.66 0l2-2A4 4 0 0 0 9 1.34L8 2.34" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/><path d="M11 9a4 4 0 0 0-5.66 0l-2 2A4 4 0 0 0 9 16.66l1-1" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/></svg></a>
+    <a class="unit-btn" href="https://youtu.be/kiCH77Vhi1g?si=IwIibMbnGHDbUW8f" target="_blank">UNIT 3 <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M7 9a4 4 0 0 0 5.66 0l2-2A4 4 0 0 0 9 1.34L8 2.34" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/><path d="M11 9a4 4 0 0 0-5.66 0l-2 2A4 4 0 0 0 9 16.66l1-1" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/></svg></a>
+    <a class="unit-btn" href="https://youtu.be/4xNJtQAnlSE?si=dKK_SlDBieQkLVrE" target="_blank">UNIT 4 <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M7 9a4 4 0 0 0 5.66 0l2-2A4 4 0 0 0 9 1.34L8 2.34" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/><path d="M11 9a4 4 0 0 0-5.66 0l-2 2A4 4 0 0 0 9 16.66l1-1" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/></svg></a>
+    <a class="unit-btn" href="https://youtu.be/kW6y0tANx6E?si=szlUCz2kar-IMJJr" target="_blank">UNIT 5 <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M7 9a4 4 0 0 0 5.66 0l2-2A4 4 0 0 0 9 1.34L8 2.34" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/><path d="M11 9a4 4 0 0 0-5.66 0l-2 2A4 4 0 0 0 9 16.66l1-1" stroke="#ff2d78" stroke-width="1.7" stroke-linecap="round"/></svg></a>
+  </div>
+
+  <!-- ===== GENERIC COMING SOON SCREEN ===== -->
+  <div class="screen" id="screen-comingsoon">
+    <button class="back-btn" onclick="goHome()">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M13 16l-6-6 6-6" stroke="#ff2d78" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Home
+    </button>
+    <div class="coming-soon">
+      <div class="emoji">🚀</div>
+      <div class="coming-soon-title">Coming Soon</div>
+      <div class="coming-soon-sub" id="coming-soon-text">This section is being prepared.<br>Stay tuned!</div>
+    </div>
+  </div>
+
+  <!-- ===== BOTTOM NAV ===== -->
+  <div class="bottomnav">
+    <button class="nav-btn active" onclick="goHome()">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+        <path d="M3 9.5L11 3l8 6.5V19a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z" stroke="#ff2d78" stroke-width="1.8" stroke-linejoin="round"/>
+        <rect x="8" y="13" width="5" height="7" rx="1" stroke="#ff2d78" stroke-width="1.8"/>
+      </svg>
+      Home
+      <div class="nav-dot"></div>
+    </button>
+    <button class="nav-btn">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+        <rect x="3" y="5" width="16" height="15" rx="2" stroke="#555" stroke-width="1.8"/>
+        <path d="M7 3v4M15 3v4M3 9h16" stroke="#555" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+      Schedule
+    </button>
+    <div class="nav-center">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+        <path d="M11 5v12M5 11h12" stroke="#ff2d78" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <button class="nav-btn">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+        <path d="M11 3H4a1 1 0 0 0-1 1v7a10 10 0 0 0 16 8V4a1 1 0 0 0-1-1h-7z" stroke="#555" stroke-width="1.8" stroke-linejoin="round"/>
+        <path d="M8 10l2 2 4-4" stroke="#555" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Achievements
+    </button>
+    <button class="nav-btn">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+        <circle cx="11" cy="8" r="4" stroke="#555" stroke-width="1.8"/>
+        <path d="M3 19c0-4 3.6-7 8-7s8 3 8 7" stroke="#555" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+      Profile
+    </button>
+  </div>
+</div>
+
+<script>
+  let currentScreen = 'home';
+
+  function showScreen(name) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    const target = document.getElementById('screen-' + name);
+    if (target) {
+      target.classList.add('active');
+      target.scrollTop = 0;
+      window.scrollTo(0,0);
+      currentScreen = name;
+    }
+  }
+
+  function goHome() {
+    showScreen('home');
+  }
+
+  function comingSoon(name) {
+    document.getElementById('coming-soon-text').innerHTML = name + ' is being prepared.<br>Stay tuned, NEHA! 💗';
+    showScreen('comingsoon');
+  }
+</script>
+</body>
+</html>
